@@ -2,6 +2,8 @@
 A program that monitor usb devices, when UsbPicProg programmer is plugged in it's software is launched
 Basically you can monitor any device and launch any program just by modifiying profiles.json
 
+Newtonsoft.Json.11.0.2 is required
+
 #### How to use
 copy profiles.json in the same folder as the program
 run the program, no window is shown, it runs in the background
