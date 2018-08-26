@@ -14,7 +14,6 @@ namespace UsbPicProgLauncher
 	static class Program
 	{
 		internal static Dictionary<string, string> profiles;
-		internal static Dictionary<string, Process> processes = new Dictionary<string, Process>();
 
 		[STAThread]
 		static void Main()
@@ -22,16 +21,11 @@ namespace UsbPicProgLauncher
 			ReadProfiles();
 
 			MessageBoxTimeout(IntPtr.Zero, "UsbPicProgLauncher by COB\r\r...Running in background", "", 0x40, 0, 2000);
-			
+
 			StartWatcher(GenerateQuery());
 
 			while (true)
 				Thread.Sleep(1000);
-		}
-
-		static void Test()
-		{
-			RunProgramFor("usbpicprog.org");
 		}
 
 		[DllImport("user32.dll", SetLastError = true)]
@@ -85,20 +79,25 @@ namespace UsbPicProgLauncher
 			foreach (string key in profiles.Keys)
 				if (key == name)
 				{
-					if (processes.ContainsKey(key))
-						if (processes[key].HasExited)
-							RunProcess(key);
-						else
-							SwitchToThisWindow(processes[key].MainWindowHandle, false);
-					else
-						RunProcess(key);
+					DeviceFound(profiles[key]);
 					break;
 				}
 		}
 
-		private static void RunProcess(string key)
+		private static void DeviceFound(string programAbsPath)
 		{
-			processes[key] = Process.Start(profiles[key]);
+			foreach (Process process in Process.GetProcesses())
+				try
+				{
+					if (process.MainModule.FileName == programAbsPath)
+					{
+						SwitchToThisWindow(process.MainWindowHandle, false);
+						return;
+					}
+				}
+				catch { }
+
+			Process.Start(programAbsPath);
 		}
 	}
 }
