@@ -97,9 +97,8 @@ namespace UsbPicProgLauncher
 			{
 				using (var file = File.CreateText(profilesFile))
 				{
-					string text = Encoding.Default.GetString(Properties.Resources.profiles);
-					file.Write(text);
-					return text;
+					file.Write(Properties.Resources.profiles);
+					return Properties.Resources.profiles;
 				}
 			}
 		}

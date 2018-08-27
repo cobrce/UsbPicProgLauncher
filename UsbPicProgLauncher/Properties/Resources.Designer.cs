@@ -61,12 +61,13 @@ namespace UsbPicProgLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to {
+        ///	&quot;usbpicprog.org&quot;:&quot;C:\\Program Files\\UsbPicProg\\usbpicprog.exe&quot;
+        ///}.
         /// </summary>
-        internal static byte[] profiles {
+        internal static string profiles {
             get {
-                object obj = ResourceManager.GetObject("profiles", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("profiles", resourceCulture);
             }
         }
     }
