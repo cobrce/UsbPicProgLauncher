@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace UsbPicProgLauncher
 {
@@ -15,17 +16,25 @@ namespace UsbPicProgLauncher
 	{
 		internal static Dictionary<string, string> profiles;
 
+
 		[STAThread]
 		static void Main()
 		{
-			ReadProfiles();
-
 			MessageBoxTimeout(IntPtr.Zero, "UsbPicProgLauncher by COB\r\r...Running in background", "", 0x40, 0, 2000);
+			if (ReadProfiles())
+			{
+				try
+				{
+					StartWatcher(GenerateQuery());
 
-			StartWatcher(GenerateQuery());
-
-			while (true)
-				Thread.Sleep(1000);
+					while (true)
+						Thread.Sleep(1000);
+				}
+				catch (Exception e)
+				{
+					MessageBox(e.Message);
+				}
+			}
 		}
 
 		[DllImport("user32.dll", SetLastError = true)]
@@ -49,20 +58,50 @@ namespace UsbPicProgLauncher
 			return query;
 		}
 
-		private static void ReadProfiles()
+		private static bool ReadProfiles()
 		{
 			string profilesFile = Path.Combine(
 				Path.GetDirectoryName(typeof(Program).Assembly.Location),
 				"profiles.json"
 				);
+
 			try
 			{
+				profiles = JsonConvert.DeserializeObject<Dictionary<string, string>>(GetJsonFileContentAsStr(profilesFile));
+				return true;
+			}
+			catch (UnauthorizedAccessException)
+			{
+				MessageBox($"{profilesFile} not found and could not create it");
+			}
+			catch (IOException)
+			{
+				MessageBox($"Can't read {profilesFile}");
+			}
+			catch
+			{
+				MessageBox($"Error parsing {profilesFile}");
+			}
+
+			return false;
+		}
+
+		private static string GetJsonFileContentAsStr(string profilesFile)
+		{
+			if (File.Exists(profilesFile))
 				using (var file = File.OpenText(profilesFile))
 				{
-					profiles = JsonConvert.DeserializeObject<Dictionary<string, string>>(file.ReadToEnd());
+					return file.ReadToEnd();
+				}
+			else
+			{
+				using (var file = File.CreateText(profilesFile))
+				{
+					string text = Encoding.Default.GetString(Properties.Resources.profiles);
+					file.Write(text);
+					return text;
 				}
 			}
-			catch { MessageBox.Show("Cannot parse setting.json", "UsbPicProgLauncher"); }
 		}
 
 		public static void WaitForUSBChangeEvent(object sender, EventArrivedEventArgs e)
@@ -98,6 +137,11 @@ namespace UsbPicProgLauncher
 				catch { }
 
 			Process.Start(programAbsPath);
+		}
+
+		private static void MessageBox(string text)
+		{
+			System.Windows.Forms.MessageBox.Show(text, "UsbPicProgLauncher");
 		}
 	}
 }
