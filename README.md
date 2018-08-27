@@ -5,8 +5,7 @@ Basically you can monitor any device and launch any program just by modifiying p
 Newtonsoft.Json.11.0.2 is required
 
 #### How to use
-copy profiles.json in the same folder as the program
-run the program, no window is shown, it runs in the background
+just run the program, if setting.json is not found it will automatically create it, no window but a message box is shown , it runs in the background
 
 #### profiles.json
 it's a json file with the following format
